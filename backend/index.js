@@ -1,26 +1,27 @@
-import express from 'express';
-import cors from 'cors';
 import { sequelize } from './models/index.js';
-import listsRouter from './routes/lists.js';
-import tasksRouter from './routes/tasks.js';
+import { App } from './App.js';
+import { ListController } from './controllers/ListController.js';
+import { TaskController } from './controllers/TaskController.js';
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Health check
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok' });
-});
-
-// Routes
-app.use('/api/lists', listsRouter);
-app.use('/api', tasksRouter);
-
+/**
+ * Initialize and start the application
+ */
 async function start() {
     try {
+        // Authenticate database connection
         await sequelize.authenticate();
         await sequelize.sync();
+
+        // Initialize controllers
+        const listController = new ListController();
+        const taskController = new TaskController();
+
+        // Create App instance with controllers
+        const app = new App({
+            controllers: [listController, taskController],
+        });
+
+        // Start server
         const port = Number(process.env.PORT || 3001);
         app.listen(port, () => {
             // eslint-disable-next-line no-console
@@ -35,6 +36,5 @@ async function start() {
 
 start();
 
-export default app;
-
-
+// Export App instance for testing purposes
+export { App };

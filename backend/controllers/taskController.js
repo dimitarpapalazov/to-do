@@ -1,38 +1,75 @@
-import { Task } from '../models/index.js';
+import { Controller } from '../base/Controller.js';
+import { TaskService } from '../services/TaskService.js';
 
-async function createTask(req, res) {
-    const { listId } = req.params;
-    const { title } = req.body || {};
-    if (!title || typeof title !== 'string' || title.trim() === '') {
-        return res.status(400).json({ error: 'Title is required' });
+export class TaskController extends Controller {
+    /**
+     * @param {Object} options - Configuration options
+     * @param {TaskService} [options.taskService] - TaskService instance (for dependency injection)
+     */
+    constructor(options = {}) {
+        super({ basePath: '/api' });
+
+        this.taskService = options.taskService || new TaskService();
     }
-    const task = await Task.create({ title: title.trim(), listId: Number(listId) });
-    res.status(201).json(task);
-}
 
-async function updateTask(req, res) {
-    const { id } = req.params;
-    const { title, completed } = req.body || {};
-    const task = await Task.findByPk(id);
-    if (!task) {
-        return res.status(404).json({ error: 'Task not found' });
+    /**
+     * Initialize routes for Task endpoints
+     */
+    initializeRoutes() {
+        this.router.get('/lists/:listId/tasks', this.asyncHandler(this.getTasksByList.bind(this)));
+        this.router.post('/lists/:listId/tasks', this.asyncHandler(this.createTask.bind(this)));
+        this.router.patch('/tasks/:id', this.asyncHandler(this.updateTask.bind(this)));
     }
-    if (typeof title === 'string') task.title = title.trim();
-    if (typeof completed === 'boolean') task.completed = completed;
-    await task.save();
-    res.json(task);
+
+    /**
+     * GET /api/lists/:listId/tasks - Get all tasks for a list
+     * @param {express.Request} req - Express request object
+     * @param {express.Response} res - Express response object
+     */
+    async getTasksByList(req, res) {
+        const { listId } = req.params;
+        const tasks = await this.taskService.findAllByListId(listId);
+        this.sendSuccess(res, tasks);
+    }
+
+    /**
+     * POST /api/lists/:listId/tasks - Create a new task
+     * @param {express.Request} req - Express request object
+     * @param {express.Response} res - Express response object
+     */
+    async createTask(req, res) {
+        try {
+            const { listId } = req.params;
+
+            const task = await this.taskService.create({
+                ...req.body,
+                listId,
+            });
+
+            this.sendSuccess(res, task, 201);
+        } catch (error) {
+            this.sendError(res, error.message, 400);
+        }
+    }
+
+
+    /**
+     * PATCH /api/tasks/:id - Update a task
+     * @param {express.Request} req - Express request object
+     * @param {express.Response} res - Express response object
+     */
+    async updateTask(req, res) {
+        try {
+            const { id } = req.params;
+            const task = await this.taskService.update(id, req.body);
+
+            if (!task) {
+                return this.sendError(res, 'Task not found', 404);
+            }
+
+            this.sendSuccess(res, task);
+        } catch (error) {
+            this.sendError(res, error.message, 400);
+        }
+    }
 }
-
-async function getTasksByList(req, res) {
-    const { listId } = req.params;
-    const tasks = await Task.findAll({ where: { listId: Number(listId) }, order: [['createdAt', 'ASC']] });
-    res.json(tasks);
-}
-
-export {
-    createTask,
-    updateTask,
-    getTasksByList,
-};
-
-
