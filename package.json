@@ -1,0 +1,21 @@
+{
+    "name": "to-do",
+    "version": "1.0.0",
+    "description": "With this project I want to showcase, improve and learn new technologies.  \r A To Do app is fairly simple and expandable, that's why i chose this idea.  \r At first, I will implement a MySQL + Express.js + Vue.js stack, inspired by system I designed and developed during my current job.  \r In the future, I want to add and experiment with new technologies such as: Pinia, Redis, Docker and everything I can think of. The same will go about the features, I will start with a simple to do list and tasks and add things I think will fit.",
+    "main": "index.js",
+    "scripts": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dimitarpapalazov/to-do.git"
+    },
+    "keywords": [],
+    "author": "Dimitar Papalazov",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/dimitarpapalazov/to-do/issues"
+    },
+    "homepage": "https://github.com/dimitarpapalazov/to-do#readme",
+    "devDependencies": {
+        "concurrently": "9.2.1"
+    }
+}
