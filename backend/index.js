@@ -1,7 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import 'dotenv/config';
-
 import { sequelize } from './models/index.js';
 import listsRouter from './routes/lists.js';
 import tasksRouter from './routes/tasks.js';
